@@ -49,6 +49,8 @@ nav a.active {
 main {
     /*padding: 20px;*/
 	flex: 1;
+	max-width: 1200px;
+    margin: auto;
 }
 
 section {
