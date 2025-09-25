@@ -23,10 +23,14 @@ header h1 {
     margin-bottom: 10px;
 }
 
-nav a {
-	display: flex;
+nav {
+    display: flex;
     gap: 15px;
     flex-wrap: wrap;
+}
+
+
+nav a {
     margin-right: 20px;
     text-decoration: none;
     font-size: 16px;
