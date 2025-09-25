@@ -25,6 +25,7 @@ header h1 {
 
 nav {
     display: flex;
+    flex-direction: row; 
     gap: 15px;
     flex-wrap: wrap;
 }
