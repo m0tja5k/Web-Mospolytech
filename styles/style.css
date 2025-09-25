@@ -83,12 +83,10 @@ footer a:hover {
     max-width: 800px;
 }
 
-/* Активная ссылка в меню */
 nav a.active {
     color: tomato;
 }
 
-/* Футер всегда внизу */
 body {
     min-height: 100vh;
     display: flex;
@@ -99,7 +97,6 @@ main {
     flex: 1;
 }
 
-/* Адаптивность главной страницы */
 @media (max-width: 800px) {
     img {
         width: 500px;
@@ -131,8 +128,7 @@ main {
 }
 
 @media (max-width: 400px) {
-    table th,
-    table td {
+    table th td {
         font-size: 14px;
         padding: 6px;
     }
