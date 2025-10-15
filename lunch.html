@@ -122,8 +122,8 @@
                     </div>
 					
                     <div class="form-group">
-                        <label for="main_dish">Главное блюдо</label>
-                        <select id="main_dish" name="main_dish" required>
+                        <label for="main_dish">Главное блюдо</label> <!-- for привязывает лейбл к полю ввода -->
+                        <select id="main_dish" name="main_dish" required> <!-- name данные для request-->
                             <option value="">-- Выберите главное блюдо --</option>
                             <option value="fried_potatoes_mushrooms">Жареная картошка с грибами</option>
                             <option value="lasagna">Лазанья</option>
@@ -149,7 +149,6 @@
 
                 <div class="form-column">
                     <h3>Ваши данные</h3>
-
                     <div class="form-group">
                         <label for="name">Имя</label>
                         <input type="text" id="name" name="name" required>
@@ -178,9 +177,9 @@
 
                     <div class="form-group">
                         <label>Время доставки:</label>
-                        <fieldset>
+                        <fieldset class="fieldset-no-border">
                             <legend>Выберите время доставки</legend>
-                            <div class="radio-group">
+                            <div class="radio-group"> <!-- тк кнопки 2, а name общий, то можно выбрать только одну -->
                                 <input type="radio" id="as_soon_as_possible" name="delivery_time_option" value="as_soon_as_possible" required>
                                 <label for="as_soon_as_possible">Как можно скорее</label>
                             </div>
