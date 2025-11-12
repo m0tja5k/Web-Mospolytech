@@ -1,4 +1,5 @@
-let currentOrder = {};
+// order.js
+let currentOrder = {}; // { category: dishObject }
 
 document.addEventListener('DOMContentLoaded', () => {
     createOrderDisplayContainer();
@@ -9,19 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function createOrderDisplayContainer() {
     const formColumns = document.querySelectorAll('.form-column');
     if (!formColumns || formColumns.length === 0) return;
-
     const orderColumn = formColumns[0];
-    const existing = orderColumn.querySelector('.order-display-root');
-    if (existing) return;
+    if (!orderColumn) return;
+    if (orderColumn.querySelector('.order-display-root')) return;
 
     const root = document.createElement('div');
     root.className = 'order-display-root';
-
     root.innerHTML = `
         <div class="order-message">Ничего не выбрано</div>
-        <div class="order-items" style="display:none;">
-            <!-- сюда будем вставлять выбранные по категориям -->
-        </div>
+        <div class="order-items" style="display:none;"></div>
     `;
     const h3 = orderColumn.querySelector('h3');
     if (h3) h3.insertAdjacentElement('afterend', root);
@@ -29,13 +26,16 @@ function createOrderDisplayContainer() {
 }
 
 function addToOrder(dish) {
+    // Снять выделение предыдущего элемента в этой категории
     if (currentOrder[dish.category]) {
-        const prevKeyword = currentOrder[dish.category].keyword;
-        const prevCard = document.querySelector(`.dish-card[data-dish="${prevKeyword}"]`);
+        const prevKey = currentOrder[dish.category].keyword;
+        const prevCard = document.querySelector(`.dish-card[data-dish="${prevKey}"]`);
         if (prevCard) prevCard.classList.remove('selected');
     }
 
     currentOrder[dish.category] = dish;
+
+    // Выделить текущую карточку
     const curCard = document.querySelector(`.dish-card[data-dish="${dish.keyword}"]`);
     if (curCard) curCard.classList.add('selected');
 
@@ -46,56 +46,55 @@ function addToOrder(dish) {
 function updateOrderDisplay() {
     const root = document.querySelector('.order-display-root');
     if (!root) return;
-
     const msg = root.querySelector('.order-message');
-    const itemsContainer = root.querySelector('.order-items');
+    const items = root.querySelector('.order-items');
 
-    const categoryLabels = {
-        soup: 'Суп',
-        main_course: 'Главное блюдо',
-        beverage: 'Напиток'
-    };
+    const categoriesOrder = [
+        { key: 'soup', label: 'Суп' },
+        { key: 'main_course', label: 'Главное блюдо' },
+        { key: 'salad', label: 'Салат/стартер' },
+        { key: 'beverage', label: 'Напиток' },
+        { key: 'dessert', label: 'Десерт' }
+    ];
 
     if (Object.keys(currentOrder).length === 0) {
         msg.textContent = 'Ничего не выбрано';
         msg.style.display = 'block';
-        itemsContainer.style.display = 'none';
+        items.style.display = 'none';
         hidePriceBlock();
         return;
     }
 
-
     msg.style.display = 'none';
-    itemsContainer.style.display = 'block';
-    itemsContainer.innerHTML = '';
+    items.style.display = 'block';
+    items.innerHTML = '';
 
-    const orderCats = ['soup', 'main_course', 'beverage'];
-    let anySelected = false;
-    orderCats.forEach(cat => {
-        const catDiv = document.createElement('div');
-        catDiv.className = 'order-category';
+    categoriesOrder.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'order-category';
 
-        if (currentOrder[cat]) {
-            anySelected = true;
-            catDiv.innerHTML = `<p><strong>${categoryLabels[cat]}:</strong> ${currentOrder[cat].name} — ${currentOrder[cat].price}₽</p>`;
+        if (currentOrder[c.key]) {
+            div.innerHTML = `<p><strong>${c.label}:</strong> ${currentOrder[c.key].name} — ${currentOrder[c.key].price}₽</p>`;
         } else {
+            // плейсхолдеры
             let placeholder = 'Блюдо не выбрано';
-            if (cat === 'beverage') placeholder = 'Напиток не выбран';
-            if (cat === 'soup') placeholder = 'Суп не выбран';
-            if (cat === 'main_course') placeholder = 'Главное блюдо не выбрано';
-            catDiv.innerHTML = `<p>${placeholder}</p>`;
+            if (c.key === 'beverage') placeholder = 'Напиток не выбран';
+            if (c.key === 'soup') placeholder = 'Суп не выбран';
+            if (c.key === 'main_course') placeholder = 'Главное блюдо не выбрано';
+            if (c.key === 'salad') placeholder = 'Салат/стартер не выбран';
+            if (c.key === 'dessert') placeholder = 'Десерт не выбран';
+            div.innerHTML = `<p>${placeholder}</p>`;
         }
-        itemsContainer.appendChild(catDiv);
+        items.appendChild(div);
     });
 
     updateTotalPrice();
 }
 
 function updateTotalPrice() {
-    const total = Object.values(currentOrder).reduce((sum, d) => sum + (d.price || 0), 0);
+    const total = Object.values(currentOrder).reduce((s, d) => s + (d.price || 0), 0);
     const root = document.querySelector('.order-display-root');
     if (!root) return;
-
     let priceBlock = root.querySelector('.order-price');
     if (!priceBlock) {
         priceBlock = document.createElement('div');
@@ -103,7 +102,6 @@ function updateTotalPrice() {
         priceBlock.style.marginTop = '10px';
         root.querySelector('.order-items').appendChild(priceBlock);
     }
-
     if (total > 0) {
         priceBlock.innerHTML = `<p><strong>Стоимость заказа:</strong> ${total}₽</p>`;
         priceBlock.style.display = 'block';
@@ -119,23 +117,24 @@ function hidePriceBlock() {
     if (priceBlock) priceBlock.style.display = 'none';
 }
 
+/**
+ * Записывает keyword'ы выбранных блюд в select'ы формы, если они там есть.
+ * mapping: soup -> id "soup", main_course -> "main_dish", beverage -> "beverage",
+ * salad -> "salad", dessert -> "dessert"
+ */
 function updateFormSelects() {
     const mapping = {
         soup: 'soup',
         main_course: 'main_dish',
-        beverage: 'beverage'
+        beverage: 'beverage',
+        salad: 'salad',
+        dessert: 'dessert'
     };
-
     Object.keys(mapping).forEach(cat => {
-        const selectId = mapping[cat];
-        const select = document.getElementById(selectId);
-        if (!select) return;
-
-        if (currentOrder[cat]) {
-            select.value = currentOrder[cat].keyword;
-        } else {
-            select.value = '';
-        }
+        const sel = document.getElementById(mapping[cat]);
+        if (!sel) return;
+        if (currentOrder[cat]) sel.value = currentOrder[cat].keyword;
+        else sel.value = '';
     });
 }
 
@@ -145,9 +144,10 @@ function attachFormHandlers() {
 
     orderForm.addEventListener('submit', (e) => {
         updateFormSelects();
+        // форма дальше отправляется стандартно
     });
 
-    orderForm.addEventListener('reset', (e) => {
+    orderForm.addEventListener('reset', () => {
         setTimeout(() => {
             currentOrder = {};
             document.querySelectorAll('.dish-card.selected').forEach(el => el.classList.remove('selected'));
@@ -156,3 +156,17 @@ function attachFormHandlers() {
         }, 0);
     });
 }
+
+// стиль выделения карточки (можно переместить в css)
+(function addSelectionStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+    .dish-card.selected {
+        border: 2px solid tomato !important;
+    }
+    .order-display-root { margin-top: 12px; }
+    .order-category { margin: 6px 0; }
+    .order-price { background: #f9f9f9; padding: 8px; border-radius: 6px; }
+    `;
+    document.head.appendChild(style);
+})();

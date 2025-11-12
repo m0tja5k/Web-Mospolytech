@@ -139,3 +139,24 @@ footer a:hover {
         padding: 6px;
     }
 }
+
+.filters-wrapper {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.filter-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: green;
+}
+.filter-btn.active {
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+}
