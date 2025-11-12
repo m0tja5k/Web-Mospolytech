@@ -22,87 +22,6 @@
     </header>
 
     <main>
-        <section>
-        
-			<h2>Супы</h2>
-            <div class="dishes-grid">
-                <div class="dish-card">
-                    <img src="sources/menu/soups/gazpacho.jpg" alt="Гаспачо">
-                    <p class="price">195₽</p>
-                    <p class="name">Гаспачо</p>
-                    <p class="weight">350 г</p>
-                    <button>Добавить</button>
-                </div>
-                <div class="dish-card">
-                    <img src="sources/menu/soups/mushroom_soup.jpg" alt="Грибной суп-пюре">
-                    <p class="price">185₽</p>
-                    <p class="name">Грибной суп-пюре</p>
-                    <p class="weight">330 г</p>
-                    <button>Добавить</button>
-                </div>
-                <div class="dish-card">
-                    <img src="sources/menu/soups/norwegian_soup.jpg" alt="Норвежский суп">
-                    <p class="price">270₽</p>
-                    <p class="name">Норвежский суп</p>
-                    <p class="weight">330 г</p>
-                    <button>Добавить</button>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2>Главные блюда</h2>
-            <div class="dishes-grid">
-                <div class="dish-card">
-                    <img src="sources/menu/main_course/friedpotatoeswithmushrooms1.jpg" alt="Жареная картошка с грибами">
-                    <p class="price">150₽</p>
-                    <p class="name">Жареная картошка с грибами</p>
-                    <p class="weight">250 г</p>
-                    <button>Добавить</button>
-                </div>
-                <div class="dish-card">
-                    <img src="sources/menu/main_course/lasagna.jpg" alt="Лазанья">
-                    <p class="price">385₽</p>
-                    <p class="name">Лазанья</p>
-                    <p class="weight">310 г</p>
-                    <button>Добавить</button>
-                </div>
-                <div class="dish-card">
-                    <img src="sources/menu/main_course/chickencutletsandmashedpotatoes.jpg" alt="Котлеты из курицы с картофельным пюре">
-                    <p class="price">225₽</p>
-                    <p class="name">Котлеты из курицы с картофельным пюре</p>
-                    <p class="weight">280 г</p>
-                    <button>Добавить</button>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2>Напитки</h2>
-            <div class="dishes-grid">
-                <div class="dish-card">
-                    <img src="sources/menu/beverages/orangejuice.jpg" alt="Апельсиновый сок">
-                    <p class="price">120₽</p>
-                    <p class="name">Апельсиновый сок</p>
-                    <p class="weight">300 мл</p>
-                    <button>Добавить</button>
-                </div>
-                <div class="dish-card">
-                    <img src="sources/menu/beverages/applejuice.jpg" alt="Яблочный сок">
-                    <p class="price">90₽</p>
-                    <p class="name">Яблочный сок</p>
-                    <p class="weight">300 мл</p>
-                    <button>Добавить</button>
-                </div>
-                <div class="dish-card">
-                    <img src="sources/menu/beverages/carrotjuice.jpg" alt="Морковный сок">
-                    <p class="price">110₽</p>
-                    <p class="name">Морковный сок</p>
-                    <p class="weight">300 мл</p>
-                    <button>Добавить</button>
-                </div>
-            </div>
-        </section>
     </main>
 
     <section class="order-form-section">
@@ -115,19 +34,13 @@
                         <label for="soup">Суп</label>
                         <select id="soup" name="soup" required>
                             <option value="">-- Выберите суп --</option>
-                            <option value="gaspacho">Гаспачо</option>
-                            <option value="mushroom_soup">Грибной суп-пюре</option>
-                            <option value="norwegian_soup">Норвежский суп</option>
                         </select>
                     </div>
-					
+                    
                     <div class="form-group">
-                        <label for="main_dish">Главное блюдо</label> <!-- for привязывает лейбл к полю ввода -->
-                        <select id="main_dish" name="main_dish" required> <!-- name данные для request-->
+                        <label for="main_dish">Главное блюдо</label>
+                        <select id="main_dish" name="main_dish" required>
                             <option value="">-- Выберите главное блюдо --</option>
-                            <option value="fried_potatoes_mushrooms">Жареная картошка с грибами</option>
-                            <option value="lasagna">Лазанья</option>
-                            <option value="chicken_cutlets">Котлеты из курицы с картофельным пюре</option>
                         </select>
                     </div>
 
@@ -135,9 +48,6 @@
                         <label for="beverage">Напиток</label>
                         <select id="beverage" name="beverage" required>
                             <option value="">-- Выберите напиток --</option>
-                            <option value="orange_juice">Апельсиновый сок</option>
-                            <option value="apple_juice">Яблочный сок</option>
-                            <option value="carrot_juice">Морковный сок</option>
                         </select>
                     </div>
 
@@ -179,7 +89,7 @@
                         <label>Время доставки:</label>
                         <fieldset class="fieldset-no-border">
                             <legend>Выберите время доставки</legend>
-                            <div class="radio-group"> <!-- тк кнопки 2, а name общий, то можно выбрать только одну -->
+                            <div class="radio-group">
                                 <input type="radio" id="as_soon_as_possible" name="delivery_time_option" value="as_soon_as_possible" required>
                                 <label for="as_soon_as_possible">Как можно скорее</label>
                             </div>
@@ -208,5 +118,10 @@
     <footer id="contacts">
         <p>Позвонить нам: <a href="tel:+70000000000">+7-000-000-00-00</a></p>
     </footer>
+
+    <!-- Подключение скриптов -->
+    <script src="js/dishes.js"></script>
+    <script src="js/display.js"></script>
+    <script src="js/order.js"></script>
 </body>
 </html>

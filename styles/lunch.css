@@ -3,6 +3,8 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .dish-card {
@@ -10,7 +12,7 @@
     padding: 30px 40px;
     border-radius: 35px;
     cursor: pointer;
-    filter: drop-shadow(17px 19px 24px rgba(0, 0, 0, 0.13));
+    filter: drop-shadow(17px 19px 20px rgba(0, 0, 0, 0.13));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -231,3 +233,7 @@
     background-color: #e63946;
 }
 
+
+.dish-card.selected {
+    border: 2px solid tomato;
+}
