@@ -1,132 +1,158 @@
-// order.js
 let currentOrder = {};
 
+document.addEventListener('DOMContentLoaded', () => {
+    createOrderDisplayContainer();
+    updateOrderDisplay();
+    attachFormHandlers();
+});
+
+function createOrderDisplayContainer() {
+    const formColumns = document.querySelectorAll('.form-column');
+    if (!formColumns || formColumns.length === 0) return;
+
+    const orderColumn = formColumns[0];
+    const existing = orderColumn.querySelector('.order-display-root');
+    if (existing) return;
+
+    const root = document.createElement('div');
+    root.className = 'order-display-root';
+
+    root.innerHTML = `
+        <div class="order-message">Ничего не выбрано</div>
+        <div class="order-items" style="display:none;">
+            <!-- сюда будем вставлять выбранные по категориям -->
+        </div>
+    `;
+    const h3 = orderColumn.querySelector('h3');
+    if (h3) h3.insertAdjacentElement('afterend', root);
+    else orderColumn.prepend(root);
+}
+
 function addToOrder(dish) {
-    // Определение текущего блюда в категории
     if (currentOrder[dish.category]) {
-        // Снятие выделения с предыдущего блюда
         const prevKeyword = currentOrder[dish.category].keyword;
         const prevCard = document.querySelector(`.dish-card[data-dish="${prevKeyword}"]`);
-        if (prevCard) {
-            prevCard.classList.remove('selected');
-        }
+        if (prevCard) prevCard.classList.remove('selected');
     }
 
-    // Сохранение нового блюда
     currentOrder[dish.category] = dish;
+    const curCard = document.querySelector(`.dish-card[data-dish="${dish.keyword}"]`);
+    if (curCard) curCard.classList.add('selected');
 
-    // Выделение текущего блюда
-    const currentCard = document.querySelector(`.dish-card[data-dish="${dish.keyword}"]`);
-    if (currentCard) {
-        currentCard.classList.add('selected');
-    }
-
-    // Обновление отображения заказа
     updateOrderDisplay();
-
-    // Обновление формы
-    updateForm();
+    updateFormSelects();
 }
 
 function updateOrderDisplay() {
-    const orderDiv = document.querySelector('.form-column h3').nextElementSibling; // Находим первый .form-group после h3
-    let orderContainer = orderDiv;
-    
-    // Проверяем, есть ли уже контейнер для заказа
-    let existingContainer = orderContainer.querySelector('.order-display-container');
-    if (!existingContainer) {
-        existingContainer = document.createElement('div');
-        existingContainer.className = 'order-display-container';
-        orderContainer.appendChild(existingContainer);
-    }
-    
-    const container = existingContainer;
-    container.innerHTML = ''; // Очистка перед обновлением
+    const root = document.querySelector('.order-display-root');
+    if (!root) return;
 
-    const categories = {
-        soup: "Суп",
-        main_course: "Главное блюдо",
-        beverage: "Напиток"
+    const msg = root.querySelector('.order-message');
+    const itemsContainer = root.querySelector('.order-items');
+
+    const categoryLabels = {
+        soup: 'Суп',
+        main_course: 'Главное блюдо',
+        beverage: 'Напиток'
     };
 
-    for (const cat in categories) {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'order-category';
-        
-        if (currentOrder[cat]) {
-            categoryDiv.innerHTML = `
-                <p><strong>${categories[cat]}:</strong> ${currentOrder[cat].name} - ${currentOrder[cat].price}₽</p>
-            `;
-        } else {
-            const placeholder = cat === 'beverage' ? 'Напиток не выбран' : (cat === 'soup' ? 'Суп не выбран' : 'Блюдо не выбрано');
-            categoryDiv.innerHTML = `<p>${placeholder}</p>`;
-        }
-        
-        container.appendChild(categoryDiv);
+    if (Object.keys(currentOrder).length === 0) {
+        msg.textContent = 'Ничего не выбрано';
+        msg.style.display = 'block';
+        itemsContainer.style.display = 'none';
+        hidePriceBlock();
+        return;
     }
 
-    // Обновление стоимости
+
+    msg.style.display = 'none';
+    itemsContainer.style.display = 'block';
+    itemsContainer.innerHTML = '';
+
+    const orderCats = ['soup', 'main_course', 'beverage'];
+    let anySelected = false;
+    orderCats.forEach(cat => {
+        const catDiv = document.createElement('div');
+        catDiv.className = 'order-category';
+
+        if (currentOrder[cat]) {
+            anySelected = true;
+            catDiv.innerHTML = `<p><strong>${categoryLabels[cat]}:</strong> ${currentOrder[cat].name} — ${currentOrder[cat].price}₽</p>`;
+        } else {
+            let placeholder = 'Блюдо не выбрано';
+            if (cat === 'beverage') placeholder = 'Напиток не выбран';
+            if (cat === 'soup') placeholder = 'Суп не выбран';
+            if (cat === 'main_course') placeholder = 'Главное блюдо не выбрано';
+            catDiv.innerHTML = `<p>${placeholder}</p>`;
+        }
+        itemsContainer.appendChild(catDiv);
+    });
+
     updateTotalPrice();
 }
 
 function updateTotalPrice() {
-    const total = Object.values(currentOrder).reduce((sum, dish) => sum + dish.price, 0);
-    
-    // Находим или создаем блок стоимости
-    let priceContainer = document.querySelector('.order-price-container');
+    const total = Object.values(currentOrder).reduce((sum, d) => sum + (d.price || 0), 0);
+    const root = document.querySelector('.order-display-root');
+    if (!root) return;
+
+    let priceBlock = root.querySelector('.order-price');
+    if (!priceBlock) {
+        priceBlock = document.createElement('div');
+        priceBlock.className = 'order-price';
+        priceBlock.style.marginTop = '10px';
+        root.querySelector('.order-items').appendChild(priceBlock);
+    }
+
     if (total > 0) {
-        if (!priceContainer) {
-            priceContainer = document.createElement('div');
-            priceContainer.className = 'order-price-container';
-            document.querySelector('.order-display-container').appendChild(priceContainer);
-        }
-        priceContainer.innerHTML = `<p><strong>Стоимость заказа:</strong> ${total}₽</p>`;
-        priceContainer.style.display = 'block';
+        priceBlock.innerHTML = `<p><strong>Стоимость заказа:</strong> ${total}₽</p>`;
+        priceBlock.style.display = 'block';
     } else {
-        if (priceContainer) {
-            priceContainer.style.display = 'none';
-        }
+        priceBlock.style.display = 'none';
     }
 }
 
-function updateForm() {
-    // Обновление значений в select'ах формы
-    Object.keys(currentOrder).forEach(cat => {
-        const select = document.getElementById(cat === 'main_course' ? 'main_dish' : cat);
-        if (select) {
+function hidePriceBlock() {
+    const root = document.querySelector('.order-display-root');
+    if (!root) return;
+    const priceBlock = root.querySelector('.order-price');
+    if (priceBlock) priceBlock.style.display = 'none';
+}
+
+function updateFormSelects() {
+    const mapping = {
+        soup: 'soup',
+        main_course: 'main_dish',
+        beverage: 'beverage'
+    };
+
+    Object.keys(mapping).forEach(cat => {
+        const selectId = mapping[cat];
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        if (currentOrder[cat]) {
             select.value = currentOrder[cat].keyword;
+        } else {
+            select.value = '';
         }
     });
 }
 
-// Добавление CSS для выделения
-const style = document.createElement('style');
-style.textContent = `
-    .dish-card.selected {
-        border: 2px solid tomato;
-    }
-    .order-display-container {
-        margin: 15px 0;
-    }
-    .order-category {
-        margin: 8px 0;
-    }
-    .order-price-container {
-        margin-top: 15px;
-        padding: 10px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-    }
-`;
-document.head.appendChild(style);
+function attachFormHandlers() {
+    const orderForm = document.getElementById('orderForm');
+    if (!orderForm) return;
 
-// Обработка отправки формы
-document.getElementById('orderForm').addEventListener('submit', function(e) {
-    // Убедимся, что отправляются keyword'ы
-    Object.keys(currentOrder).forEach(cat => {
-        const select = document.getElementById(cat === 'main_course' ? 'main_dish' : cat);
-        if (select && currentOrder[cat]) {
-            select.value = currentOrder[cat].keyword;
-        }
+    orderForm.addEventListener('submit', (e) => {
+        updateFormSelects();
     });
-});
+
+    orderForm.addEventListener('reset', (e) => {
+        setTimeout(() => {
+            currentOrder = {};
+            document.querySelectorAll('.dish-card.selected').forEach(el => el.classList.remove('selected'));
+            updateOrderDisplay();
+            updateFormSelects();
+        }, 0);
+    });
+}
