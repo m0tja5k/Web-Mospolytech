@@ -78,7 +78,8 @@ const dishes = [
         price: 225,
         category: "main_course",
         count: "280 г",
-        image: "sources/menu/main_course/chickencutletsandmashedpotatoes.jpg"
+        image: "sources/menu/main_course/chickencutletsandmashedpotatoes.jpg",
+        kind: "meat"
     },
     {
         keyword: "ribnaja_cutlets",
@@ -87,7 +88,7 @@ const dishes = [
         category: "main_course",
         count: "270 г",
         image: "sources/menu/main_course/fishrice.jpg",
-        kind: "meat"
+        kind: "fish"
     },
     {
         keyword: "pizza_margarita",
@@ -96,16 +97,16 @@ const dishes = [
         category: "main_course",
         count: "470 г",
         image: "sources/menu/main_course/pizza.jpg",
-        kind: "fish"
+        kind: "meat"
     },
     {
         keyword: "shrimppasta",
-        name: "Паста креветками",
+        name: "Паста с креветками",
         price: 290,
         category: "main_course",
         count: "300 г",
         image: "sources/menu/main_course/shrimppasta.jpg",
-        kind: "veg"
+        kind: "fish"
     },
     //salatb1
     {
@@ -127,40 +128,40 @@ const dishes = [
         kind: "veg"
     },
     {
-        keyword: "salmon_salad",
-        name: "Салат с лососем и авокадо",
+        keyword: "frenchfries1",
+        name: "Картофель-фри с чесночным соусом",
         price: 390,
         category: "salad",
         count: "240 г",
-        image: "sources/menu/salads_starters/salmon_avocado.jpg",
-        kind: "fish"
-    },
-    {
-        keyword: "vegetable_salad",
-        name: "Овощной салат с оливковым маслом",
-        price: 280,
-        category: "salad",
-        count: "200 г",
-        image: "sources/menu/salads_starters/vegetable_salad.jpg",
+        image: "sources/menu/salads_starters/frenchfries1.jpg",
         kind: "veg"
     },
     {
-        keyword: "bruschetta_tomato",
-        name: "Брускетта с томатами и базиликом",
-        price: 260,
+        keyword: "frenchfries2",
+        name: "Картофель-фри с кетчупом",
+        price: 280,
         category: "salad",
-        count: "180 г",
-        image: "sources/menu/salads_starters/bruschetta_tomato.jpg",
+        count: "200 г",
+        image: "sources/menu/salads_starters/frenchfries2.jpg",
         kind: "veg"
     },
     {
         keyword: "caprese",
-        name: "Капрезе с моцареллой",
+        name: "Капрезе",
+        price: 260,
+        category: "salad",
+        count: "180 г",
+        image: "sources/menu/salads_starters/caprese.jpg",
+        kind: "veg"
+    },
+    {
+        keyword: "tunasalad",
+        name: "Салат с тунцом",
         price: 330,
         category: "salad",
         count: "200 г",
-        image: "sources/menu/salads_starters/caprese.jpg",
-        kind: "veg"
+        image: "sources/menu/salads_starters/tunasalad.jpg",
+        kind: "fish"
     },
 
     //napitki
@@ -192,86 +193,86 @@ const dishes = [
         kind: "cold"
     },
     {
-        keyword: "latte",
-        name: "Кофе латте",
+        keyword: "cappuccino",
+        name: "Каппучино",
         price: 180,
         category: "beverage",
         count: "250 мл",
-        image: "sources/menu/beverages/latte.jpg",
+        image: "sources/menu/beverages/cappuccino.jpg",
         kind: "hot"
     },
     {
-        keyword: "green_tea",
+        keyword: "greentea",
         name: "Зелёный чай",
         price: 90,
         category: "beverage",
         count: "300 мл",
-        image: "sources/menu/beverages/green_tea.jpg",
+        image: "sources/menu/beverages/greentea.jpg",
         kind: "hot"
     },
     {
-        keyword: "black_tea",
+        keyword: "tea",
         name: "Чёрный чай",
         price: 90,
         category: "beverage",
         count: "300 мл",
-        image: "sources/menu/beverages/black_tea.jpg",
+        image: "sources/menu/beverages/tea.jpg",
         kind: "hot"
     },
 
     //desert
     {
-        keyword: "tiramisu",
-        name: "Тирамису",
+        keyword: "donuts",
+        name: "Пончики на компанию",
         price: 290,
         category: "dessert",
         count: "200 г",
-        image: "sources/menu/desserts/tiramisu.jpg",
-        kind: "medium"
+        image: "sources/menu/desserts/donuts.jpg",
+        kind: "large"
     },
     {
-        keyword: "honey_cake",
-        name: "Медовик",
+        keyword: "donuts2",
+        name: "Пончики для одного",
         price: 260,
         category: "dessert",
         count: "180 г",
-        image: "sources/menu/desserts/honey_cake.jpg",
+        image: "sources/menu/desserts/donuts2.jpg",
         kind: "medium"
     },
     {
-        keyword: "chocolate_cake",
+        keyword: "chocolatecheesecake",
         name: "Шоколадный чизкейк",
         price: 270,
         category: "dessert",
         count: "150 г",
-        image: "sources/menu/desserts/chocolate_cake.jpg",
+        image: "sources/menu/desserts/chocolatecheesecake.jpg",
         kind: "small"
     },
     {
-        keyword: "mini_donuts",
-        name: "Мини-пончики (6 шт.)",
+        keyword: "chocolatecake",
+        name: "Шоколадный торт",
         price: 450,
         category: "dessert",
         count: "160 г",
-        image: "sources/menu/desserts/mini_donuts.jpg",
+        image: "sources/menu/desserts/chocolatecake.jpg",
         kind: "small"
     },
     {
-        keyword: "waffle_tower",
-        name: "Вафельный торт",
+        keyword: "checheesecake",
+        name: "Чизкейк",
         price: 370,
         category: "dessert",
         count: "140 г",
-        image: "sources/menu/desserts/waffle_tower.jpg",
+        image: "sources/menu/desserts/checheesecake.jpg",
         kind: "small"
     },
     {
-        keyword: "big_cake",
-        name: "Пирог на компанию",
+        keyword: "baklava",
+        name: "Пахлава",
         price: 590,
         category: "dessert",
         count: "350 г",
-        image: "sources/menu/desserts/big_cake.jpg",
-        kind: "large"
+        image: "sources/menu/desserts/baklava.jpg",
+        kind: "medium"
     }
 ];

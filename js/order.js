@@ -1,5 +1,4 @@
-// order.js
-let currentOrder = {}; // { category: dishObject }
+let currentOrder = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     createOrderDisplayContainer();
@@ -7,12 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     attachFormHandlers();
 });
 
-function createOrderDisplayContainer() {
-    const formColumns = document.querySelectorAll('.form-column');
-    if (!formColumns || formColumns.length === 0) return;
-    const orderColumn = formColumns[0];
-    if (!orderColumn) return;
-    if (orderColumn.querySelector('.order-display-root')) return;
+function createOrderDisplayContainer() { //создание контейнера с отображением заказа
+    const orderColumn = document.querySelectorAll('.form-column')[0];//берётся 1 колонка флекса
 
     const root = document.createElement('div');
     root.className = 'order-display-root';
@@ -21,12 +16,12 @@ function createOrderDisplayContainer() {
         <div class="order-items" style="display:none;"></div>
     `;
     const h3 = orderColumn.querySelector('h3');
-    if (h3) h3.insertAdjacentElement('afterend', root);
+    if (h3) h3.insertAdjacentElement('afterend', root);//если заголовок есть, то конт вставляется после afterend, если нет, то в начало колонки(prepend)
     else orderColumn.prepend(root);
 }
 
 function addToOrder(dish) {
-    // Снять выделение предыдущего элемента в этой категории
+    //если в этой категории уже выбрано, то ищет какое keyword, потом ищет по нему карточку и убирает selected
     if (currentOrder[dish.category]) {
         const prevKey = currentOrder[dish.category].keyword;
         const prevCard = document.querySelector(`.dish-card[data-dish="${prevKey}"]`);
@@ -35,7 +30,7 @@ function addToOrder(dish) {
 
     currentOrder[dish.category] = dish;
 
-    // Выделить текущую карточку
+    // по keyword ищет карточку и делает selected
     const curCard = document.querySelector(`.dish-card[data-dish="${dish.keyword}"]`);
     if (curCard) curCard.classList.add('selected');
 
@@ -45,7 +40,6 @@ function addToOrder(dish) {
 
 function updateOrderDisplay() {
     const root = document.querySelector('.order-display-root');
-    if (!root) return;
     const msg = root.querySelector('.order-message');
     const items = root.querySelector('.order-items');
 
@@ -61,14 +55,15 @@ function updateOrderDisplay() {
         msg.textContent = 'Ничего не выбрано';
         msg.style.display = 'block';
         items.style.display = 'none';
-        hidePriceBlock();
+        const priceBlock = root.querySelector('.order-price');
+        if (priceBlock) priceBlock.style.display = 'none';
         return;
     }
 
     msg.style.display = 'none';
     items.style.display = 'block';
     items.innerHTML = '';
-
+    //идёт по категориям и для каждой меняет заказ
     categoriesOrder.forEach(c => {
         const div = document.createElement('div');
         div.className = 'order-category';
@@ -76,7 +71,7 @@ function updateOrderDisplay() {
         if (currentOrder[c.key]) {
             div.innerHTML = `<p><strong>${c.label}:</strong> ${currentOrder[c.key].name} — ${currentOrder[c.key].price}₽</p>`;
         } else {
-            // плейсхолдеры
+            // добавление заглушки не выбрано
             let placeholder = 'Блюдо не выбрано';
             if (c.key === 'beverage') placeholder = 'Напиток не выбран';
             if (c.key === 'soup') placeholder = 'Суп не выбран';
@@ -92,9 +87,10 @@ function updateOrderDisplay() {
 }
 
 function updateTotalPrice() {
-    const total = Object.values(currentOrder).reduce((s, d) => s + (d.price || 0), 0);
+    const total = Object.values(currentOrder).reduce((s, d) => s + (d.price || 0), 0);//reduce сворачивает массив в значение с помощью функции
+    //array.reduce(callback(accumulator, currentValue[, index[, array]])[, initialValue]) 
+    //callback — функция, которая будет вызываться для каждого элемента массива (кроме первого элемента, если не указано значение initialValue).
     const root = document.querySelector('.order-display-root');
-    if (!root) return;
     let priceBlock = root.querySelector('.order-price');
     if (!priceBlock) {
         priceBlock = document.createElement('div');
@@ -110,63 +106,19 @@ function updateTotalPrice() {
     }
 }
 
-function hidePriceBlock() {
-    const root = document.querySelector('.order-display-root');
-    if (!root) return;
-    const priceBlock = root.querySelector('.order-price');
-    if (priceBlock) priceBlock.style.display = 'none';
-}
-
-/**
- * Записывает keyword'ы выбранных блюд в select'ы формы, если они там есть.
- * mapping: soup -> id "soup", main_course -> "main_dish", beverage -> "beverage",
- * salad -> "salad", dessert -> "dessert"
- */
-function updateFormSelects() {
-    const mapping = {
-        soup: 'soup',
-        main_course: 'main_dish',
-        beverage: 'beverage',
-        salad: 'salad',
-        dessert: 'dessert'
-    };
-    Object.keys(mapping).forEach(cat => {
-        const sel = document.getElementById(mapping[cat]);
-        if (!sel) return;
-        if (currentOrder[cat]) sel.value = currentOrder[cat].keyword;
-        else sel.value = '';
-    });
-}
-
+//добавление обработки кнопок формы
 function attachFormHandlers() {
     const orderForm = document.getElementById('orderForm');
-    if (!orderForm) return;
-
     orderForm.addEventListener('submit', (e) => {
         updateFormSelects();
-        // форма дальше отправляется стандартно
     });
-
     orderForm.addEventListener('reset', () => {
         setTimeout(() => {
             currentOrder = {};
             document.querySelectorAll('.dish-card.selected').forEach(el => el.classList.remove('selected'));
             updateOrderDisplay();
             updateFormSelects();
-        }, 0);
+        }, 0);//setTimeout(, 0) - надо, чтобы браузер успел сбросить форму
     });
 }
 
-// стиль выделения карточки (можно переместить в css)
-(function addSelectionStyle() {
-    const style = document.createElement('style');
-    style.textContent = `
-    .dish-card.selected {
-        border: 2px solid tomato !important;
-    }
-    .order-display-root { margin-top: 12px; }
-    .order-category { margin: 6px 0; }
-    .order-price { background: #f9f9f9; padding: 8px; border-radius: 6px; }
-    `;
-    document.head.appendChild(style);
-})();

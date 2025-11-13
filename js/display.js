@@ -1,4 +1,3 @@
-// display.js
 document.addEventListener('DOMContentLoaded', () => {
     const categories = {
         soup: { title: "Супы", filters: [ {label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"} ] },
@@ -11,27 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Сортируем блюда внутри каждой категории по name
     const grouped = {};
     Object.keys(categories).forEach(cat => {
-        grouped[cat] = dishes
-            .filter(d => d.category === cat)
-            .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+        grouped[cat] = dishes.filter(d => d.category === cat).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
     });
 
-    // Очищаем main и создаём секции
-    const main = document.querySelector('main');
-    main.innerHTML = '';
+    // очистка main
+    const main = document.querySelector('main');//querySelector - первый элемент, который имеет заданный селектор
+    main.innerHTML = '';//вставка внутрь элемента
 
-    // состояние активного фильтра на категорию: {category: activeKind|null}
+    // состояние фильтров 
     const activeFilters = {};
-
+    //создание секций для каждой категории
     Object.keys(categories).forEach(cat => {
         const section = document.createElement('section');
 
-        // Заголовок
+        //заголовок категории
         const h2 = document.createElement('h2');
         h2.textContent = categories[cat].title;
-        section.appendChild(h2);
+        section.appendChild(h2);//добавление в конец
 
-        // Блок фильтров (кнопки)
+        // блок фильтров
         const filtersWrapper = document.createElement('div');
         filtersWrapper.className = 'filters-wrapper';
         categories[cat].filters.forEach(f => {
@@ -41,22 +38,18 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.textContent = f.label;
             btn.setAttribute('data-kind', f.kind);
             btn.setAttribute('data-cat', cat);
-            // стили можно настроить через css
             btn.addEventListener('click', () => {
-                const current = activeFilters[cat] || null;
-                if (current === f.kind) {
-                    // снять фильтр
+                const current = activeFilters[cat];
+                if (current === f.kind) {//нажатие активного фильтра
                     activeFilters[cat] = null;
                     btn.classList.remove('active');
-                    // снять активность у других кнопок этой категории
                     const sibs = filtersWrapper.querySelectorAll('.filter-btn');
-                    sibs.forEach(s => s.classList.remove('active'));
-                } else {
-                    // включить этот фильтр — снять у остальных
+                    sibs.forEach(s => s.classList.remove('active'));//убрать класс active для всех кнопок в этом div-е
+                } else {//включение фильтра
                     activeFilters[cat] = f.kind;
                     const sibs = filtersWrapper.querySelectorAll('.filter-btn');
-                    sibs.forEach(s => s.classList.remove('active'));
-                    btn.classList.add('active');
+                    sibs.forEach(s => s.classList.remove('active'));//убрать класс active для всех кнопок в этом div-е
+                    btn.classList.add('active');//Сделать данную кнопку активной
                 }
                 applyFilterToCategory(cat);
             });
@@ -64,12 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         section.appendChild(filtersWrapper);
 
-        // Grid с карточками
         const grid = document.createElement('div');
         grid.className = 'dishes-grid';
         grid.setAttribute('data-cat', cat);
 
-        // Добавляем карточки (каждая карточка имеет data-dish и data-kind)
         grouped[cat].forEach(d => {
             const card = createDishCard(d);
             grid.appendChild(card);
@@ -77,18 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         section.appendChild(grid);
         main.appendChild(section);
-
-        // начальный фильтр пустой
         activeFilters[cat] = null;
     });
-
-    // После рендера карточек — повесим обработчики "Добавить" (order.js содержит addToOrder)
     initAddButtons();
 });
 
-/**
- * Создает HTML карточку блюда. Карточка получает data-dish (keyword) и data-kind.
- */
+
 function createDishCard(dish) {
     const card = document.createElement('div');
     card.className = 'dish-card';
@@ -105,20 +90,18 @@ function createDishCard(dish) {
     return card;
 }
 
-/**
- * Повесить обработчики на все кнопки "Добавить".
- */
+//добавляет обработчик нажатий
 function initAddButtons() {
     const buttons = document.querySelectorAll('.dish-card button');
     buttons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = btn.closest('.dish-card');
+            e.stopPropagation();//предотвращает распространение события по DOM-дереву и блокирует его обработку на родительских или дочерних элементах
+            const card = btn.closest('.dish-card');//поднимается по DOM-дереву вверх и ищет ближайший перент элемент
             const keyword = card.getAttribute('data-dish');
             const dish = dishes.find(d => d.keyword === keyword);
             if (!dish) return;
             if (typeof addToOrder === 'function') {
-                addToOrder(dish);
+                addToOrder(dish);//из файла order
             } else {
                 console.warn('addToOrder not found. Подключите order.js после display.js');
             }
@@ -126,26 +109,20 @@ function initAddButtons() {
     });
 }
 
-/**
- * Применяет текущий фильтр к категории: показывает/скрывает карточки.
- * ВАЖНО: выбранные позиции (currentOrder) не трогаются — они остаются в памяти.
- */
+//применение к карточкам
 function applyFilterToCategory(cat) {
-    // найти контейнер категорийных фильтров, получить активную кнопку
     const section = document.querySelector(`.dishes-grid[data-cat="${cat}"]`);
-    if (!section) return;
-    // ищем активную кнопочку в секции
     const filtersParent = section.closest('section').querySelector('.filters-wrapper');
-    const activeBtn = filtersParent ? filtersParent.querySelector('.filter-btn.active') : null;
+    const activeBtn = filtersParent ? filtersParent.querySelector('.filter-btn.active') : null;// условие ? если тру : если фолс
     const activeKind = activeBtn ? activeBtn.getAttribute('data-kind') : null;
 
     const cards = section.querySelectorAll('.dish-card');
     cards.forEach(card => {
         const kind = card.getAttribute('data-kind');
         if (!activeKind) {
-            card.style.display = ''; // показать
+            card.style.display = ''; // если фильтр не выбран
         } else {
-            card.style.display = (kind === activeKind) ? '' : 'none';
+            card.style.display = (kind === activeKind) ? '' : 'none';// условие ? если тру : если фолс
         }
     });
 }
