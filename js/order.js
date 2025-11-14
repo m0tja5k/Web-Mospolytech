@@ -122,3 +122,18 @@ function attachFormHandlers() {
     });
 }
 
+function updateFormSelects() {
+    const mapping = {
+        soup: 'soup',
+        main_course: 'main_dish',
+        beverage: 'beverage',
+        salad: 'salad',
+        dessert: 'dessert'
+    };
+    Object.keys(mapping).forEach(cat => {
+        const sel = document.getElementById(mapping[cat]);
+        if (!sel) return;
+        if (currentOrder[cat]) sel.value = currentOrder[cat].keyword;
+        else sel.value = '';
+    });
+}
