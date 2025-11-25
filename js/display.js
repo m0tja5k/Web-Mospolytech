@@ -1,34 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
+function renderDishes() {
     const categories = {
-        soup: { title: "Супы", filters: [ {label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"} ] },
-        main_course: { title: "Главные блюда", filters: [ {label:"рыбное", kind:"fish"}, {label:"мясное", kind:"meat"}, {label:"вегетарианское", kind:"veg"} ] },
-        beverage: { title: "Напитки", filters: [ {label:"холодный", kind:"cold"}, {label:"горячий", kind:"hot"} ] },
-        salad: { title: "Салаты и стартеры", filters: [ {label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"} ] },
-        dessert: { title: "Десерты", filters: [ {label:"маленькая порция", kind:"small"}, {label:"средняя порция", kind:"medium"}, {label:"большая порция", kind:"large"} ] }
+        soup: { title: "Супы", filters: [{label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"}] },
+        main_course: { title: "Главные блюда", filters: [{label:"рыбное", kind:"fish"}, {label:"мясное", kind:"meat"}, {label:"вегетарианское", kind:"veg"}] },
+        beverage: { title: "Напитки", filters: [{label:"холодный", kind:"cold"}, {label:"горячий", kind:"hot"}] },
+        salad: { title: "Салаты и стартеры", filters: [{label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"}] },
+        dessert: { title: "Десерты", filters: [{label:"маленькая порция", kind:"small"}, {label:"средняя порция", kind:"medium"}, {label:"большая порция", kind:"large"}] }
     };
 
-    // Сортируем блюда внутри каждой категории по name
     const grouped = {};
     Object.keys(categories).forEach(cat => {
         grouped[cat] = dishes.filter(d => d.category === cat).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
     });
 
-    // очистка main
-    const main = document.querySelector('main');//querySelector - первый элемент, который имеет заданный селектор
-    main.innerHTML = '';//вставка внутрь элемента
+    const main = document.querySelector('main');
+    main.innerHTML = '';
 
-    // состояние фильтров 
     const activeFilters = {};
-    //создание секций для каждой категории
+
     Object.keys(categories).forEach(cat => {
         const section = document.createElement('section');
-
-        //заголовок категории
         const h2 = document.createElement('h2');
         h2.textContent = categories[cat].title;
-        section.appendChild(h2);//добавление в конец
+        section.appendChild(h2);
 
-        // блок фильтров
         const filtersWrapper = document.createElement('div');
         filtersWrapper.className = 'filters-wrapper';
         categories[cat].filters.forEach(f => {
@@ -39,18 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.setAttribute('data-kind', f.kind);
             btn.setAttribute('data-cat', cat);
             btn.addEventListener('click', () => {
-                const current = activeFilters[cat];
-                if (current === f.kind) {//нажатие активного фильтра
-                    activeFilters[cat] = null;
-                    btn.classList.remove('active');
-                    const sibs = filtersWrapper.querySelectorAll('.filter-btn');
-                    sibs.forEach(s => s.classList.remove('active'));//убрать класс active для всех кнопок в этом div-е
-                } else {//включение фильтра
-                    activeFilters[cat] = f.kind;
-                    const sibs = filtersWrapper.querySelectorAll('.filter-btn');
-                    sibs.forEach(s => s.classList.remove('active'));//убрать класс active для всех кнопок в этом div-е
-                    btn.classList.add('active');//Сделать данную кнопку активной
-                }
+                activeFilters[cat] = activeFilters[cat] === f.kind ? null : f.kind;
+                document.querySelectorAll(`.filter-btn[data-cat="${cat}"]`).forEach(b => b.classList.toggle('active', b.getAttribute('data-kind') === activeFilters[cat]));
                 applyFilterToCategory(cat);
             });
             filtersWrapper.appendChild(btn);
@@ -70,10 +54,52 @@ document.addEventListener('DOMContentLoaded', () => {
         main.appendChild(section);
         activeFilters[cat] = null;
     });
-    initAddButtons();
-    createLunchVariantsSection();
-});
 
+    // Переподключаем кнопки "Добавить" после динамической загрузки
+    initAddButtons();
+}
+
+// Запускаем загрузку при старте страницы
+document.addEventListener('DOMContentLoaded', () => {
+    loadDishes();                    // ← Загружаем с сервера
+    createLunchVariantsSection();    // ← Твоя секция с вариантами ланча (если есть)
+});
+async function loadDishes() {
+    try {
+        const response = await fetch('https://edu.std-900.ist.mospolytech.ru/labs/api/dishes');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Приводим данные к нужному формату (если API отдаёт чуть иначе)
+        dishes = data.map(item => ({
+            keyword: item.keyword,
+            name: item.name,
+            price: item.price,
+            category: item.category,
+            count: item.count || "1 порция",
+            image: item.image.startsWith('http') 
+                ? item.image 
+                : `http://lab7-api.std-900.ist.mospolytech.ru/images/${item.category}s/${item.keyword}`, // fallback
+            kind: item.kind || "veg"
+        }));
+
+        // После загрузки — запускаем отрисовку (всё как раньше)
+        renderDishes();
+        console.log('Блюда успешно загружены с сервера:', dishes.length);
+    } catch (error) {
+        console.error('Ошибка загрузки блюд:', error);
+        document.querySelector('main').innerHTML = `
+            <section style="text-align:center; padding:50px; color:#d63031;">
+                <h2>Не удалось загрузить меню</h2>
+                <p>Проверьте подключение к интернету и попробуйте обновить страницу.</p>
+            </section>
+        `;
+    }
+}
 
 function createDishCard(dish) {
     const card = document.createElement('div');

@@ -217,7 +217,7 @@
 
 .form-buttons button[type="reset"] {
     background-color: #f1eee9;
-    color: #333;
+    color: black;
 }
 
 .form-buttons button[type="reset"]:hover {
@@ -230,7 +230,7 @@
 }
 
 .form-buttons button[type="submit"]:hover {
-    background-color: #e63946;
+    background-color: tomato;
 }
 
 
@@ -254,7 +254,7 @@
   color: green;
 }
 .filter-btn.active {
-  background: #2e8b57;
+  background: green;
   color: #fff;
   border: none;
 }
@@ -322,7 +322,7 @@
 }
 
 .notification-box {
-    background: #fff;
+    background: white;
     padding: 30px 40px;
     text-align: center;
     max-width: 420px;
