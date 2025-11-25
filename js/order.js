@@ -110,14 +110,17 @@ function updateTotalPrice() {
 function attachFormHandlers() {
     const orderForm = document.getElementById('orderForm');
     orderForm.addEventListener('submit', (e) => {
+        e.preventDefault();
         updateFormSelects();
         const validationResult = validateOrder();
         if (!validationResult.valid) {
-            e.preventDefault();
             showNotification(validationResult.message);
+            return;
         }
+        orderForm.submit();
     });
     orderForm.addEventListener('reset', () => {
+        showNotification('Ничего не выбрано. Выберите блюда для заказа');
         setTimeout(() => {
             currentOrder = {};
             document.querySelectorAll('.dish-card.selected').forEach(el => el.classList.remove('selected'));
@@ -144,47 +147,42 @@ function updateFormSelects() {
 }
 
 function validateOrder() {
-    const selectedCategories = Object.keys(currentOrder).filter(key => key !== 'dessert');
-    const hasSoup = selectedCategories.includes('soup');
-    const hasMain = selectedCategories.includes('main_course');
-    const hasSalad = selectedCategories.includes('salad');
-    const hasBeverage = selectedCategories.includes('beverage');
+    const hasSoup = !!currentOrder.soup;
+    const hasMain = !!currentOrder.main_course;
+    const hasSalad = !!currentOrder.salad;
+    const hasBeverage = !!currentOrder.beverage;
 
-    const combos = [
-        [hasSoup, hasMain, hasSalad, hasBeverage],
-        [hasSoup, hasMain, false, hasBeverage],
-        [hasSoup, false, hasSalad, hasBeverage],
-        [false, hasMain, hasSalad, hasBeverage],
-        [false, hasMain, false, hasBeverage]
+    const validCombos = [
+        hasSoup && hasMain && hasSalad && hasBeverage,
+        hasSoup && hasMain && hasBeverage, 
+        hasSoup && hasSalad && hasBeverage,
+        hasMain && hasSalad && hasBeverage,
+        hasMain && hasBeverage
     ];
 
-    const isValidCombo = combos.some(combo => 
-        combo[0] === hasSoup &&
-        combo[1] === hasMain &&
-        combo[2] === hasSalad &&
-        combo[3] === hasBeverage
-    );
-
-    if (isValidCombo) {
+    if (validCombos.some(v => v)) {
         return { valid: true };
     }
 
-    if (selectedCategories.length === 0) {
+    const selectedCount = Object.keys(currentOrder).length - (currentOrder.dessert ? 1 : 0);
+
+    if (selectedCount === 0) {
         return { valid: false, message: 'Ничего не выбрано. Выберите блюда для заказа' };
     }
-    if ((hasSoup || hasMain || hasSalad) && !hasBeverage) {
+    if (!hasBeverage && selectedCount > 0) {
         return { valid: false, message: 'Выберите напиток' };
     }
     if (hasSoup && !hasMain && !hasSalad) {
         return { valid: false, message: 'Выберите главное блюдо/салат/стартер' };
     }
-    if (hasSalad && !hasSoup && !hasMain) {
+    if ((hasSalad || hasBeverage) && !hasSoup && !hasMain) {
         return { valid: false, message: 'Выберите суп или главное блюдо' };
     }
-    if ((hasBeverage || currentOrder.dessert) && !hasMain) {
+    if ((hasBeverage || currentOrder.dessert) && !hasMain && !hasSoup) {
         return { valid: false, message: 'Выберите главное блюдо' };
     }
-    return { valid: false, message: 'Ничего не выбрано. Выберите блюда для заказа' };
+
+    return { valid: false, message: 'Выберите полный ланч согласно доступным вариантам' };
 }
 
 function showNotification(message) {
@@ -198,7 +196,7 @@ function showNotification(message) {
     overlay.innerHTML = `
         <div class="notification-box">
             <p>${message}</p>
-            <button>Окей</button>
+            <button>Окей👌</button>
         </div>
     `;
 

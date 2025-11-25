@@ -130,8 +130,6 @@ function applyFilterToCategory(cat) {
 
 function createLunchVariantsSection() {
     const main = document.querySelector('main');
-
-    // Создаём секцию
     const section = document.createElement('section');
     section.className = 'lunch-options-section';
 
@@ -140,7 +138,7 @@ function createLunchVariantsSection() {
         <div class="lunch-variants-grid" id="lunchVariantsGrid"></div>
     `;
 
-    // Вставляем сразу после header, но перед остальными секциями с блюдами
+
     const firstCategorySection = main.querySelector('section');
     if (firstCategorySection) {
         main.insertBefore(section, firstCategorySection);
