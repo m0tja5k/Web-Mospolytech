@@ -54,16 +54,15 @@ function renderDishes() {
         main.appendChild(section);
         activeFilters[cat] = null;
     });
-
-    // Переподключаем кнопки "Добавить" после динамической загрузки
     initAddButtons();
 }
 
-// Запускаем загрузку при старте страницы
+
 document.addEventListener('DOMContentLoaded', () => {
-    loadDishes();                    // ← Загружаем с сервера
-    createLunchVariantsSection();    // ← Твоя секция с вариантами ланча (если есть)
+    loadDishes();
+    createLunchVariantsSection();
 });
+
 async function loadDishes() {
     try {
         const response = await fetch('https://edu.std-900.ist.mospolytech.ru/labs/api/dishes');
@@ -74,7 +73,6 @@ async function loadDishes() {
 
         const data = await response.json();
 
-        // Приводим данные к нужному формату (если API отдаёт чуть иначе)
         dishes = data.map(item => ({
             keyword: item.keyword,
             name: item.name,
@@ -87,10 +85,10 @@ async function loadDishes() {
             kind: item.kind || "veg"
         }));
 
-        // После загрузки — запускаем отрисовку (всё как раньше)
         renderDishes();
         console.log('Блюда успешно загружены с сервера:', dishes.length);
-    } catch (error) {
+    } 
+    catch (error) {
         console.error('Ошибка загрузки блюд:', error);
         document.querySelector('main').innerHTML = `
             <section style="text-align:center; padding:50px; color:#d63031;">
