@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeFilters[cat] = null;
     });
     initAddButtons();
+    createLunchVariantsSection();
 });
 
 
@@ -124,5 +125,70 @@ function applyFilterToCategory(cat) {
         } else {
             card.style.display = (kind === activeKind) ? '' : 'none';// условие ? если тру : если фолс
         }
+    });
+}
+
+function createLunchVariantsSection() {
+    const main = document.querySelector('main');
+
+    // Создаём секцию
+    const section = document.createElement('section');
+    section.className = 'lunch-options-section';
+
+    section.innerHTML = `
+        <h2>Доступные варианты ланча</h2>
+        <div class="lunch-variants-grid" id="lunchVariantsGrid"></div>
+    `;
+
+    // Вставляем сразу после header, но перед остальными секциями с блюдами
+    const firstCategorySection = main.querySelector('section');
+    if (firstCategorySection) {
+        main.insertBefore(section, firstCategorySection);
+    } else {
+        main.prepend(section);
+    }
+
+    const grid = section.querySelector('#lunchVariantsGrid');
+    const variants = [
+        ['soup', 'main_course', 'salad', 'beverage'],
+        ['soup', 'main_course', 'beverage'],
+        ['soup', 'salad', 'beverage'],
+        ['main_course', 'salad', 'beverage'],
+        ['main_course', 'beverage']
+    ];
+
+    const exampleImages = {
+        soup:        "sources/icons/soup.png",
+        main_course: "sources/icons/main.png",
+        salad:       "sources/icons/salad.png",
+        beverage:    "sources/icons/drink.png",
+        dessert:     "sources/icons/desert.png"
+    };
+
+    const labels = {
+        soup: "Суп",
+        main_course: "Главное блюдо",
+        salad: "Салат",
+        beverage: "Напиток"
+    };
+
+
+    variants.forEach(variant => {
+        const variantBlock = document.createElement('div');
+        variantBlock.className = 'lunch-variant';
+
+        variant.forEach(cat => {
+            const dishBlock = document.createElement('div');
+            dishBlock.className = 'dish-block';
+
+            dishBlock.innerHTML = `
+                <img src="${exampleImages[cat]}" alt="${labels[cat]}">
+                <p>${labels[cat]}</p>
+            `;
+
+            variantBlock.appendChild(dishBlock);
+        });
+
+        grid.appendChild(variantBlock);
     });
 }

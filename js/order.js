@@ -111,6 +111,11 @@ function attachFormHandlers() {
     const orderForm = document.getElementById('orderForm');
     orderForm.addEventListener('submit', (e) => {
         updateFormSelects();
+        const validationResult = validateOrder();
+        if (!validationResult.valid) {
+            e.preventDefault();
+            showNotification(validationResult.message);
+        }
     });
     orderForm.addEventListener('reset', () => {
         setTimeout(() => {
@@ -135,5 +140,72 @@ function updateFormSelects() {
         if (!sel) return;
         if (currentOrder[cat]) sel.value = currentOrder[cat].keyword;
         else sel.value = '';
+    });
+}
+
+function validateOrder() {
+    const selectedCategories = Object.keys(currentOrder).filter(key => key !== 'dessert');
+    const hasSoup = selectedCategories.includes('soup');
+    const hasMain = selectedCategories.includes('main_course');
+    const hasSalad = selectedCategories.includes('salad');
+    const hasBeverage = selectedCategories.includes('beverage');
+
+    const combos = [
+        [hasSoup, hasMain, hasSalad, hasBeverage],
+        [hasSoup, hasMain, false, hasBeverage],
+        [hasSoup, false, hasSalad, hasBeverage],
+        [false, hasMain, hasSalad, hasBeverage],
+        [false, hasMain, false, hasBeverage]
+    ];
+
+    const isValidCombo = combos.some(combo => 
+        combo[0] === hasSoup &&
+        combo[1] === hasMain &&
+        combo[2] === hasSalad &&
+        combo[3] === hasBeverage
+    );
+
+    if (isValidCombo) {
+        return { valid: true };
+    }
+
+    if (selectedCategories.length === 0) {
+        return { valid: false, message: 'Ничего не выбрано. Выберите блюда для заказа' };
+    }
+    if ((hasSoup || hasMain || hasSalad) && !hasBeverage) {
+        return { valid: false, message: 'Выберите напиток' };
+    }
+    if (hasSoup && !hasMain && !hasSalad) {
+        return { valid: false, message: 'Выберите главное блюдо/салат/стартер' };
+    }
+    if (hasSalad && !hasSoup && !hasMain) {
+        return { valid: false, message: 'Выберите суп или главное блюдо' };
+    }
+    if ((hasBeverage || currentOrder.dessert) && !hasMain) {
+        return { valid: false, message: 'Выберите главное блюдо' };
+    }
+    return { valid: false, message: 'Ничего не выбрано. Выберите блюда для заказа' };
+}
+
+function showNotification(message) {
+    let overlay = document.querySelector('.notification-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'notification-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    overlay.innerHTML = `
+        <div class="notification-box">
+            <p>${message}</p>
+            <button>Окей</button>
+        </div>
+    `;
+
+    overlay.style.display = 'flex';
+
+    const button = overlay.querySelector('button');
+    button.addEventListener('click', () => {
+        overlay.style.display = 'none';
     });
 }
