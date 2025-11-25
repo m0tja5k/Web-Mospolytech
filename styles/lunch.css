@@ -280,9 +280,7 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    border: 1px solid #ccc;
     padding: 10px;
-    border-radius: 8px;
 }
 
 .dish-block {
@@ -310,7 +308,7 @@
 
 .desserts-info {
     margin-top: 20px;
-    font-size: 14px; /* меньше на 2pt, предполагая базовый 16px */
+    font-size: 14px;
 }
 
 .notification-overlay {

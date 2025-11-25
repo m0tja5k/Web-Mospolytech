@@ -154,7 +154,8 @@ function createLunchVariantsSection() {
         ['soup', 'main_course', 'beverage'],
         ['soup', 'salad', 'beverage'],
         ['main_course', 'salad', 'beverage'],
-        ['main_course', 'beverage']
+        ['main_course', 'beverage'],
+        ['dessert']
     ];
 
     const exampleImages = {
@@ -169,7 +170,8 @@ function createLunchVariantsSection() {
         soup: "Суп",
         main_course: "Главное блюдо",
         salad: "Салат",
-        beverage: "Напиток"
+        beverage: "Напиток",
+        dessert: "Десерт"
     };
 
 
@@ -185,6 +187,13 @@ function createLunchVariantsSection() {
                 <img src="${exampleImages[cat]}" alt="${labels[cat]}">
                 <p>${labels[cat]}</p>
             `;
+            if (cat==='dessert') {
+                dishBlock.innerHTML = `
+                <img src="${exampleImages[cat]}" alt="${labels[cat]}">
+                <p>${labels[cat]}</p>
+                <p>(Добавлять можно к любому заказу))</p>
+            `;
+            }
 
             variantBlock.appendChild(dishBlock);
         });
