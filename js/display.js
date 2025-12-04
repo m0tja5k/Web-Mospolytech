@@ -1,8 +1,10 @@
+let dishes; // Global dishes array
+
 function renderDishes() {
     const categories = {
         soup: { title: "Супы", filters: [{label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"}] },
-        main_course: { title: "Главные блюда", filters: [{label:"рыбное", kind:"fish"}, {label:"мясное", kind:"meat"}, {label:"вегетарианское", kind:"veg"}] },
-        beverage: { title: "Напитки", filters: [{label:"холодный", kind:"cold"}, {label:"горячий", kind:"hot"}] },
+        "main-course": { title: "Главные блюда", filters: [{label:"рыбное", kind:"fish"}, {label:"мясное", kind:"meat"}, {label:"вегетарианское", kind:"veg"}] },
+        drink: { title: "Напитки", filters: [{label:"холодный", kind:"cold"}, {label:"горячий", kind:"hot"}] },
         salad: { title: "Салаты и стартеры", filters: [{label:"рыбный", kind:"fish"}, {label:"мясной", kind:"meat"}, {label:"вегетарианский", kind:"veg"}] },
         dessert: { title: "Десерты", filters: [{label:"маленькая порция", kind:"small"}, {label:"средняя порция", kind:"medium"}, {label:"большая порция", kind:"large"}] }
     };
@@ -57,12 +59,6 @@ function renderDishes() {
     initAddButtons();
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadDishes();
-    createLunchVariantsSection();
-});
-
 async function loadDishes() {
     try {
         const response = await fetch('https://edu.std-900.ist.mospolytech.ru/labs/api/dishes');
@@ -85,17 +81,20 @@ async function loadDishes() {
             kind: item.kind || "veg"
         }));
 
-        renderDishes();
         console.log('Блюда успешно загружены с сервера:', dishes.length);
     } 
     catch (error) {
         console.error('Ошибка загрузки блюд:', error);
-        document.querySelector('main').innerHTML = `
+        document.querySelector('main') ? document.querySelector('main').innerHTML = `
             <section style="text-align:center; padding:50px; color:#d63031;">
                 <h2>Не удалось загрузить меню</h2>
                 <p>Проверьте подключение к интернету и попробуйте обновить страницу.</p>
             </section>
-        `;
+        ` : '';
+        document.querySelector('.order-composition') ? document.querySelector('.order-composition').innerHTML = `
+            <h2>Состав заказа</h2>
+            <p style="text-align:center; color:#d63031;">Не удалось загрузить меню</p>
+        ` : '';
     }
 }
 
@@ -115,18 +114,17 @@ function createDishCard(dish) {
     return card;
 }
 
-//добавляет обработчик нажатий
 function initAddButtons() {
     const buttons = document.querySelectorAll('.dish-card button');
     buttons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.stopPropagation();//предотвращает распространение события по DOM-дереву и блокирует его обработку на родительских или дочерних элементах
-            const card = btn.closest('.dish-card');//поднимается по DOM-дереву вверх и ищет ближайший перент элемент
+            e.stopPropagation();
+            const card = btn.closest('.dish-card');
             const keyword = card.getAttribute('data-dish');
             const dish = dishes.find(d => d.keyword === keyword);
             if (!dish) return;
             if (typeof addToOrder === 'function') {
-                addToOrder(dish);//из файла order
+                addToOrder(dish);
             } else {
                 console.warn('addToOrder not found. Подключите order.js после display.js');
             }
@@ -134,20 +132,19 @@ function initAddButtons() {
     });
 }
 
-//применение к карточкам
 function applyFilterToCategory(cat) {
     const section = document.querySelector(`.dishes-grid[data-cat="${cat}"]`);
     const filtersParent = section.closest('section').querySelector('.filters-wrapper');
-    const activeBtn = filtersParent ? filtersParent.querySelector('.filter-btn.active') : null;// условие ? если тру : если фолс
+    const activeBtn = filtersParent ? filtersParent.querySelector('.filter-btn.active') : null;
     const activeKind = activeBtn ? activeBtn.getAttribute('data-kind') : null;
 
     const cards = section.querySelectorAll('.dish-card');
     cards.forEach(card => {
         const kind = card.getAttribute('data-kind');
         if (!activeKind) {
-            card.style.display = ''; // если фильтр не выбран
+            card.style.display = ''; 
         } else {
-            card.style.display = (kind === activeKind) ? '' : 'none';// условие ? если тру : если фолс
+            card.style.display = (kind === activeKind) ? '' : 'none';
         }
     });
 }
@@ -161,7 +158,6 @@ function createLunchVariantsSection() {
         <h2>Доступные варианты ланча</h2>
         <div class="lunch-variants-grid" id="lunchVariantsGrid"></div>
     `;
-
 
     const firstCategorySection = main.querySelector('section');
     if (firstCategorySection) {
@@ -196,7 +192,6 @@ function createLunchVariantsSection() {
         dessert: "Десерт"
     };
 
-
     variants.forEach(variant => {
         const variantBlock = document.createElement('div');
         variantBlock.className = 'lunch-variant';
@@ -223,3 +218,41 @@ function createLunchVariantsSection() {
         grid.appendChild(variantBlock);
     });
 }
+
+function renderSelectedDishes() {
+    const grid = document.getElementById('selectedDishesGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const selected = Object.values(currentOrder);
+    if (selected.length === 0) {
+        grid.innerHTML = '<p>Ничего не выбрано. Чтобы добавить блюда в заказ, перейдите на страницу <a href="lunch.html">Собрать ланч</a>.</p>';
+        return;
+    }
+
+    selected.forEach(dish => {
+        const card = createDishCard(dish);
+        const btn = card.querySelector('button');
+        btn.textContent = 'Удалить';
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFromOrder(dish.category);
+        });
+        grid.appendChild(card);
+    });
+}
+
+async function initPage() {
+    await loadDishes();
+    if (typeof loadOrder === 'function') loadOrder();
+    if (window.pageType === 'lunch') {
+        renderDishes();
+        createLunchVariantsSection();
+        initAddButtons();
+    } else if (window.pageType === 'orders') {
+        renderSelectedDishes();
+    }
+    if (typeof updateOrderSummary === 'function') updateOrderSummary();
+}
+
+document.addEventListener('DOMContentLoaded', initPage);

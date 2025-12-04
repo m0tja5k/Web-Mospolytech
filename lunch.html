@@ -15,7 +15,7 @@
             <nav>
                 <a href="index.html">О нас</a>
                 <a href="lunch.html" class="active">Собрать ланч</a>
-                <a href="index.html#orders">Заказы</a>
+                <a href="orders.html">Оформить заказ</a>
                 <a href="lunch.html#contacts">Контакты</a>
             </nav>
         </div>
@@ -24,101 +24,11 @@
     <main>
     </main>
 
-    <section class="order-form-section">
-        <h2>Сделать заказ</h2>
-        <form id="orderForm" action="https://httpbin.org/post" method="POST">
-            <div class="form-columns">
-                <div class="form-column">
-                    <h3>Ваш заказ</h3>
-                    <!-- <div class="form-group">
-                        <label for="soup">Суп</label>
-                        <select id="soup" name="soup" required>
-                            <option value="">-- Выберите суп --</option>
-                        </select>
-                    </div> -->            
-                    <!-- <div class="form-group">
-                        <label for="main_dish">Главное блюдо</label>
-                        <select id="main_dish" name="main_dish" required>
-                            <option value="">-- Выберите главное блюдо --</option>
-                        </select>
-                    </div> -->
-                    <!-- <div class="form-group">
-                        <label for="beverage">Напиток</label>
-                        <select id="beverage" name="beverage" required>
-                            <option value="">-- Выберите напиток --</option>
-                        </select>
-                    </div> -->
-                    
-                    
-                    
-                    <div class="form-group">
-                        <label for="comments">Комментарии к заказу</label>
-                        <textarea id="comments" name="comments" rows="5"></textarea>
-                    </div>
-                </div>
-
-                <div class="form-column">
-                    <h3>Ваши данные</h3>
-                    <div class="form-group">
-                        <label for="name">Имя</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="subscribe" name="subscribe" checked>
-                        <label for="subscribe">Получать информацию о скидках и акциях</label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Номер телефона</label>
-                        <input type="tel" id="phone" name="phone" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address">Адрес доставки</label>
-                        <input type="text" id="address" name="address" required>
-                        <small>Доставка осуществляется только по Москве</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Время доставки:</label>
-                        <fieldset class="fieldset-no-border">
-                            <legend>Выберите время доставки</legend>
-                            <div class="radio-group">
-                                <input type="radio" id="as_soon_as_possible" name="delivery_time_option" value="as_soon_as_possible" required>
-                                <label for="as_soon_as_possible">Как можно скорее</label>
-                            </div>
-                            <div class="radio-group">
-                                <input type="radio" id="specified_time" name="delivery_time_option" value="specified_time">
-                                <label for="specified_time">К указанному времени</label>
-                            </div>
-                        </fieldset>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="delivery_time">Укажите время доставки</label>
-                        <input type="time" id="delivery_time" name="delivery_time" min="07:00" max="23:00" step="300">
-                        <small>Доступное время доставки с 7:00 до 23:00</small>
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="reset">Сбросить</button>
-                        <button type="submit">Отправить</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </section>
-
     <footer id="contacts">
         <p>Позвонить нам: <a href="tel:+70000000000">+7-000-000-00-00</a></p>
     </footer>
 
+    <script>window.pageType = 'lunch';</script>
     <script src="js/dishes.js"></script>
     <script src="js/display.js"></script>
     <script src="js/order.js"></script>
