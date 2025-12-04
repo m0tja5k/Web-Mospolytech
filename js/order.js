@@ -2,13 +2,17 @@ let currentOrder = {};
 
 const categoriesOrder = [
     { key: 'soup', label: 'Суп' },
-    { key: 'main_course', label: 'Главное блюдо' },
+    { key: 'main-course', label: 'Главное блюдо' },
     { key: 'salad', label: 'Салат/стартер' },
-    { key: 'beverage', label: 'Напиток' },
+    { key: 'drink', label: 'Напиток' },
     { key: 'dessert', label: 'Десерт' }
 ];
 
 function loadOrder() {
+    // Проверяем что dishes загружены
+    if (!dishes || dishes.length === 0) {
+        return;
+    }
     const saved = localStorage.getItem('currentOrder');
     if (!saved) return;
     const orderKeywords = JSON.parse(saved);
@@ -56,7 +60,12 @@ function removeFromOrder(cat) {
         delete currentOrder[cat];
         saveOrder();
         updateOrderSummary();
-        if (window.pageType === 'orders') renderSelectedDishes();
+        if (window.pageType === 'orders' && typeof renderSelectedDishes === 'function') {
+            renderSelectedDishes().then(() => {
+                // После обновления списка блюд обновляем summary
+                updateOrderSummary();
+            });
+        }
     }
 }
 
@@ -78,18 +87,12 @@ function createOrderDisplayContainer() {
 function createCheckoutPanel() {
     const panel = document.createElement('div');
     panel.id = 'checkoutPanel';
-    panel.style.position = 'sticky';
-    panel.style.bottom = '0';
-    panel.style.left = '0';
-    panel.style.width = '100%';
-    panel.style.backgroundColor = '#f8f8f8';
-    panel.style.borderTop = '1px solid #ddd';
-    panel.style.padding = '10px';
-    panel.style.display = 'none';
-    panel.style.textAlign = 'center';
+    panel.className = 'checkout-panel';
     panel.innerHTML = `
-        <span id="totalPriceText">Стоимость заказа: 0₽</span>
-        <a id="checkoutLink" href="orders.html" style="margin-left: 20px; text-decoration: underline; color: gray;" disabled>Перейти к оформлению</a>
+        <div class="checkout-panel-content">
+            <span id="totalPriceText" class="checkout-price">Стоимость заказа: 0₽</span>
+            <a id="checkoutLink" href="orders.html" class="checkout-button">Перейти к оформлению</a>
+        </div>
     `;
     document.body.appendChild(panel);
 }
@@ -105,17 +108,11 @@ function updateOrderSummary() {
         const items = root.querySelector('.order-items');
         const priceBlock = root.querySelector('.order-price');
 
-        if (Object.keys(currentOrder).length === 0) {
-            msg.textContent = 'Ничего не выбрано';
-            msg.style.display = 'block';
-            items.style.display = 'none';
-            priceBlock.style.display = 'none';
-            return;
-        }
-
+        // Всегда показываем список категорий, даже если ничего не выбрано
         msg.style.display = 'none';
         items.style.display = 'block';
         items.innerHTML = '';
+        
         categoriesOrder.forEach(c => {
             const div = document.createElement('div');
             div.className = 'order-category';
@@ -123,11 +120,12 @@ function updateOrderSummary() {
                 div.innerHTML = `<p><strong>${c.label}:</strong> ${currentOrder[c.key].name} — ${currentOrder[c.key].price}₽</p>`;
             } else {
                 let placeholder = 'Не выбран';
-                if (c.key === 'main_course' || c.key === 'salad' || c.key === 'dessert') placeholder = 'Не выбрано';
+                if (c.key === 'main-course' || c.key === 'salad' || c.key === 'dessert') placeholder = 'Не выбрано';
                 div.innerHTML = `<p><strong>${c.label}:</strong> ${placeholder}</p>`;
             }
             items.appendChild(div);
         });
+        
         priceBlock.innerHTML = `<p><strong>Стоимость заказа:</strong> ${total}₽</p>`;
         priceBlock.style.display = 'block';
     }
@@ -140,14 +138,13 @@ function updateOrderSummary() {
         if (hasItems) {
             document.getElementById('totalPriceText').textContent = `Стоимость заказа: ${total}₽`;
             const link = document.getElementById('checkoutLink');
+            
             if (validation.valid) {
-                link.removeAttribute('disabled');
-                link.style.color = 'blue';
-                link.style.pointerEvents = 'auto';
+                link.classList.remove('disabled');
+                link.href = 'orders.html';
             } else {
-                link.setAttribute('disabled', 'true');
-                link.style.color = 'gray';
-                link.style.pointerEvents = 'none';
+                link.classList.add('disabled');
+                link.href = '#';
             }
         }
     }
@@ -188,9 +185,9 @@ function attachFormHandlers() {
 
 function validateOrder() {
     const hasSoup = !!currentOrder.soup;
-    const hasMain = !!currentOrder.main_course;
+    const hasMain = !!currentOrder['main-course'];
     const hasSalad = !!currentOrder.salad;
-    const hasBeverage = !!currentOrder.beverage;
+    const hasBeverage = !!currentOrder.drink;
 
     const validCombos = [
         hasSoup && hasMain && hasSalad && hasBeverage,

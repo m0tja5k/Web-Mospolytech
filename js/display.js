@@ -168,27 +168,27 @@ function createLunchVariantsSection() {
 
     const grid = section.querySelector('#lunchVariantsGrid');
     const variants = [
-        ['soup', 'main_course', 'salad', 'beverage'],
-        ['soup', 'main_course', 'beverage'],
-        ['soup', 'salad', 'beverage'],
-        ['main_course', 'salad', 'beverage'],
-        ['main_course', 'beverage'],
+        ['soup', 'main-course', 'salad', 'drink'],
+        ['soup', 'main-course', 'drink'],
+        ['soup', 'salad', 'drink'],
+        ['main-course', 'salad', 'drink'],
+        ['main-course', 'drink'],
         ['dessert']
     ];
 
     const exampleImages = {
         soup:        "sources/icons/soup.png",
-        main_course: "sources/icons/main.png",
+        "main-course": "sources/icons/main.png",
         salad:       "sources/icons/salad.png",
-        beverage:    "sources/icons/drink.png",
+        drink:       "sources/icons/drink.png",
         dessert:     "sources/icons/desert.png"
     };
 
     const labels = {
         soup: "Суп",
-        main_course: "Главное блюдо",
+        "main-course": "Главное блюдо",
         salad: "Салат",
-        beverage: "Напиток",
+        drink: "Напиток",
         dessert: "Десерт"
     };
 
@@ -219,38 +219,61 @@ function createLunchVariantsSection() {
     });
 }
 
-function renderSelectedDishes() {
+async function renderSelectedDishes() {
     const grid = document.getElementById('selectedDishesGrid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    const selected = Object.values(currentOrder);
-    if (selected.length === 0) {
+    // Загружаем данные из localStorage
+    const saved = localStorage.getItem('currentOrder');
+    if (!saved) {
         grid.innerHTML = '<p>Ничего не выбрано. Чтобы добавить блюда в заказ, перейдите на страницу <a href="lunch.html">Собрать ланч</a>.</p>';
         return;
     }
 
-    selected.forEach(dish => {
-        const card = createDishCard(dish);
-        const btn = card.querySelector('button');
-        btn.textContent = 'Удалить';
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeFromOrder(dish.category);
-        });
-        grid.appendChild(card);
+    const orderKeywords = JSON.parse(saved);
+    const selectedKeywords = Object.values(orderKeywords);
+    
+    if (selectedKeywords.length === 0) {
+        grid.innerHTML = '<p>Ничего не выбрано. Чтобы добавить блюда в заказ, перейдите на страницу <a href="lunch.html">Собрать ланч</a>.</p>';
+        return;
+    }
+
+    // Загружаем полные данные блюд с сервера (dishes уже должны быть загружены)
+    if (!dishes || dishes.length === 0) {
+        grid.innerHTML = '<p>Загрузка данных...</p>';
+        return;
+    }
+
+    // Проходим по категориям, чтобы сохранить связь категория-блюдо
+    Object.keys(orderKeywords).forEach(category => {
+        const keyword = orderKeywords[category];
+        const dish = dishes.find(d => d.keyword === keyword);
+        if (dish) {
+            const card = createDishCard(dish);
+            const btn = card.querySelector('button');
+            btn.textContent = 'Удалить';
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeFromOrder(category);
+            });
+            grid.appendChild(card);
+        }
     });
 }
 
 async function initPage() {
     await loadDishes();
-    if (typeof loadOrder === 'function') loadOrder();
     if (window.pageType === 'lunch') {
         renderDishes();
         createLunchVariantsSection();
         initAddButtons();
+        // После рендеринга блюд загружаем заказ из localStorage, чтобы выделить выбранные
+        if (typeof loadOrder === 'function') loadOrder();
     } else if (window.pageType === 'orders') {
-        renderSelectedDishes();
+        // Для страницы orders сначала загружаем заказ из localStorage
+        if (typeof loadOrder === 'function') loadOrder();
+        await renderSelectedDishes();
     }
     if (typeof updateOrderSummary === 'function') updateOrderSummary();
 }
