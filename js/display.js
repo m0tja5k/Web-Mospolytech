@@ -1,4 +1,4 @@
-let dishes; // Global dishes array
+let dishes; 
 
 function renderDishes() {
     const categories = {
@@ -114,17 +114,18 @@ function createDishCard(dish) {
     return card;
 }
 
+//добавляет обработчик нажатий
 function initAddButtons() {
     const buttons = document.querySelectorAll('.dish-card button');
     buttons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = btn.closest('.dish-card');
+            e.stopPropagation();//предотвращает распространение события по DOM-дереву и блокирует его обработку на родительских или дочерних элементах
+            const card = btn.closest('.dish-card');//поднимается по DOM-дереву вверх и ищет ближайший перент элемент
             const keyword = card.getAttribute('data-dish');
             const dish = dishes.find(d => d.keyword === keyword);
             if (!dish) return;
             if (typeof addToOrder === 'function') {
-                addToOrder(dish);
+                addToOrder(dish);//из файла order
             } else {
                 console.warn('addToOrder not found. Подключите order.js после display.js');
             }
@@ -132,9 +133,10 @@ function initAddButtons() {
     });
 }
 
+//применение к карточкам
 function applyFilterToCategory(cat) {
     const section = document.querySelector(`.dishes-grid[data-cat="${cat}"]`);
-    const filtersParent = section.closest('section').querySelector('.filters-wrapper');
+    const filtersParent = section.closest('section').querySelector('.filters-wrapper');// условие ? если тру : если фолс
     const activeBtn = filtersParent ? filtersParent.querySelector('.filter-btn.active') : null;
     const activeKind = activeBtn ? activeBtn.getAttribute('data-kind') : null;
 
@@ -142,9 +144,9 @@ function applyFilterToCategory(cat) {
     cards.forEach(card => {
         const kind = card.getAttribute('data-kind');
         if (!activeKind) {
-            card.style.display = ''; 
+            card.style.display = ''; // если фильтр не выбран
         } else {
-            card.style.display = (kind === activeKind) ? '' : 'none';
+            card.style.display = (kind === activeKind) ? '' : 'none';// условие ? если тру : если фолс
         }
     });
 }
@@ -224,7 +226,6 @@ async function renderSelectedDishes() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Загружаем данные из localStorage
     const saved = localStorage.getItem('currentOrder');
     if (!saved) {
         grid.innerHTML = '<p>Ничего не выбрано. Чтобы добавить блюда в заказ, перейдите на страницу <a href="lunch.html">Собрать ланч</a>.</p>';
@@ -239,13 +240,11 @@ async function renderSelectedDishes() {
         return;
     }
 
-    // Загружаем полные данные блюд с сервера (dishes уже должны быть загружены)
     if (!dishes || dishes.length === 0) {
         grid.innerHTML = '<p>Загрузка данных...</p>';
         return;
     }
 
-    // Проходим по категориям, чтобы сохранить связь категория-блюдо
     Object.keys(orderKeywords).forEach(category => {
         const keyword = orderKeywords[category];
         const dish = dishes.find(d => d.keyword === keyword);
@@ -268,10 +267,8 @@ async function initPage() {
         renderDishes();
         createLunchVariantsSection();
         initAddButtons();
-        // После рендеринга блюд загружаем заказ из localStorage, чтобы выделить выбранные
         if (typeof loadOrder === 'function') loadOrder();
     } else if (window.pageType === 'orders') {
-        // Для страницы orders сначала загружаем заказ из localStorage
         if (typeof loadOrder === 'function') loadOrder();
         await renderSelectedDishes();
     }

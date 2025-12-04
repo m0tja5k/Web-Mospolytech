@@ -9,7 +9,6 @@ const categoriesOrder = [
 ];
 
 function loadOrder() {
-    // Проверяем что dishes загружены
     if (!dishes || dishes.length === 0) {
         return;
     }
@@ -36,6 +35,7 @@ function saveOrder() {
 }
 
 function addToOrder(dish) {
+     //если в этой категории уже выбрано, то ищет какое keyword, потом ищет по нему карточку и убирает selected
     if (currentOrder[dish.category]) {
         const prevKey = currentOrder[dish.category].keyword;
         const prevCard = document.querySelector(`.dish-card[data-dish="${prevKey}"]`);
@@ -44,6 +44,7 @@ function addToOrder(dish) {
 
     currentOrder[dish.category] = dish;
 
+    // по keyword ищет карточку и делает selected
     const curCard = document.querySelector(`.dish-card[data-dish="${dish.keyword}"]`);
     if (curCard) curCard.classList.add('selected');
 
@@ -62,15 +63,14 @@ function removeFromOrder(cat) {
         updateOrderSummary();
         if (window.pageType === 'orders' && typeof renderSelectedDishes === 'function') {
             renderSelectedDishes().then(() => {
-                // После обновления списка блюд обновляем summary
                 updateOrderSummary();
             });
         }
     }
 }
 
-function createOrderDisplayContainer() {
-    const orderColumn = document.querySelectorAll('.form-column')[0];
+function createOrderDisplayContainer() { //создание контейнера с отображением заказа
+    const orderColumn = document.querySelectorAll('.form-column')[0];//берётся 1 колонка флекса
 
     const root = document.createElement('div');
     root.className = 'order-display-root';
@@ -80,7 +80,7 @@ function createOrderDisplayContainer() {
         <div class="order-price" style="margin-top:10px;"></div>
     `;
     const h3 = orderColumn.querySelector('h3');
-    if (h3) h3.insertAdjacentElement('afterend', root);
+    if (h3) h3.insertAdjacentElement('afterend', root);//если заголовок есть, то конт вставляется после afterend, если нет, то в начало колонки(prepend)
     else orderColumn.prepend(root);
 }
 
@@ -98,27 +98,29 @@ function createCheckoutPanel() {
 }
 
 function updateOrderSummary() {
-    const total = Object.values(currentOrder).reduce((sum, dish) => sum + (dish ? dish.price : 0), 0);
+    const total = Object.values(currentOrder).reduce((sum, dish) => sum + (dish ? dish.price : 0), 0);//reduce сворачивает массив в значение с помощью функции
+    //array.reduce(callback(accumulator, currentValue[, index[, array]])[, initialValue]) 
+    //callback — функция, которая будет вызываться для каждого элемента массива (кроме первого элемента, если не указано значение initialValue).
     const validation = validateOrder();
 
-    // For orders.html: Update order display in form
     const root = document.querySelector('.order-display-root');
     if (root) {
         const msg = root.querySelector('.order-message');
         const items = root.querySelector('.order-items');
         const priceBlock = root.querySelector('.order-price');
 
-        // Всегда показываем список категорий, даже если ничего не выбрано
         msg.style.display = 'none';
         items.style.display = 'block';
         items.innerHTML = '';
         
+        //идёт по категориям и для каждой меняет заказ
         categoriesOrder.forEach(c => {
             const div = document.createElement('div');
             div.className = 'order-category';
             if (currentOrder[c.key]) {
                 div.innerHTML = `<p><strong>${c.label}:</strong> ${currentOrder[c.key].name} — ${currentOrder[c.key].price}₽</p>`;
             } else {
+                  // добавление заглушки не выбрано
                 let placeholder = 'Не выбран';
                 if (c.key === 'main-course' || c.key === 'salad' || c.key === 'dessert') placeholder = 'Не выбрано';
                 div.innerHTML = `<p><strong>${c.label}:</strong> ${placeholder}</p>`;
@@ -130,7 +132,6 @@ function updateOrderSummary() {
         priceBlock.style.display = 'block';
     }
 
-    // For lunch.html: Update sticky panel
     const panel = document.getElementById('checkoutPanel');
     if (panel) {
         const hasItems = Object.keys(currentOrder).length > 0;
@@ -150,6 +151,7 @@ function updateOrderSummary() {
     }
 }
 
+//добавление обработки кнопок формы
 function attachFormHandlers() {
     const orderForm = document.getElementById('orderForm');
     orderForm.addEventListener('submit', (e) => {
@@ -160,7 +162,6 @@ function attachFormHandlers() {
             return;
         }
 
-        // Add hidden inputs for dishes
         Object.keys(currentOrder).forEach(cat => {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -179,7 +180,7 @@ function attachFormHandlers() {
             document.querySelectorAll('.dish-card.selected').forEach(el => el.classList.remove('selected'));
             updateOrderSummary();
             if (window.pageType === 'orders') renderSelectedDishes();
-        }, 0);
+        }, 0);//setTimeout(, 0) - надо, чтобы браузер успел сбросить форму
     });
 }
 
