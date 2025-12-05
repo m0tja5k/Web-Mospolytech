@@ -446,13 +446,11 @@
     margin-right: 10px;
 }
 
-/* Переопределяем глобальные стили для img внутри карточек */
 .order-composition .dish-card img {
-    width: 100% !important;
-    height: auto !important;
+    width: 100%;
+    height: auto;
 }
 
-/* Убеждаемся, что карточки имеют правильный размер */
 .order-composition .dish-card {
     background-color: white;
     padding: 30px 40px;
