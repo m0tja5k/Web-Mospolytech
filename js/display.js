@@ -70,6 +70,7 @@ async function loadDishes() {
         const data = await response.json();
 
         dishes = data.map(item => ({
+            id: item.id,
             keyword: item.keyword,
             name: item.name,
             price: item.price,
@@ -77,7 +78,7 @@ async function loadDishes() {
             count: item.count || "1 порция",
             image: item.image.startsWith('http') 
                 ? item.image 
-                : `http://lab7-api.std-900.ist.mospolytech.ru/images/${item.category}s/${item.keyword}`, // fallback
+                : `http://lab7-api.std-900.ist.mospolytech.ru/images/${item.category}s/${item.keyword}`,
             kind: item.kind || "veg"
         }));
 
@@ -93,7 +94,7 @@ async function loadDishes() {
         ` : '';
         document.querySelector('.order-composition') ? document.querySelector('.order-composition').innerHTML = `
             <h2>Состав заказа</h2>
-            <p style="text-align:center; color:#d63031;">Не удалось загрузить меню</p>
+            <p style="text-align:center; color:red;">Не удалось загрузить меню</p>
         ` : '';
     }
 }

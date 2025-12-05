@@ -90,6 +90,20 @@
     nav a {
         font-size: 20px;
     }
+    .checkout-panel-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .checkout-price {
+        font-size: 1.1em;
+    }
+    
+    .checkout-button {
+        width: 100%;
+        max-width: 300px;
+    }
 }
 
 .order-form-section {
@@ -413,23 +427,6 @@
     color: white;
     cursor: not-allowed;
     pointer-events: none;
-}
-
-@media (max-width: 600px) {
-    .checkout-panel-content {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .checkout-price {
-        font-size: 1.1em;
-    }
-    
-    .checkout-button {
-        width: 100%;
-        max-width: 300px;
-    }
 }
 
 .order-composition {

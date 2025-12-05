@@ -1,3 +1,6 @@
+const API_ADRESS = 'https://edu.std-900.ist.mospolytech.ru/labs/api';
+const API_KEY = '333c3bbe-f938-4323-9580-cd6c7794fc83'; 
+
 let currentOrder = {};
 
 const categoriesOrder = [
@@ -23,7 +26,7 @@ function loadOrder() {
             const card = document.querySelector(`.dish-card[data-dish="${keyword}"]`);
             if (card) card.classList.add('selected');
         }
-    });
+    }); 
 }
 
 function saveOrder() {
@@ -67,6 +70,27 @@ function removeFromOrder(cat) {
             });
         }
     }
+}
+
+function buildOrderPayload(orderForm) {
+    const deliveryType = orderForm.delivery_time_option.value === 'as_soon_as_possible' ? 'now' : 'by_time';
+    const payload = {
+        full_name: orderForm.name.value.trim(),
+        email: orderForm.email.value.trim(),
+        subscribe: orderForm.subscribe.checked ? 1 : 0,
+        phone: orderForm.phone.value.trim(),
+        delivery_address: orderForm.address.value.trim(),
+        delivery_type: deliveryType,
+        delivery_time: deliveryType === 'by_time' ? orderForm.delivery_time.value : null,
+        comment: orderForm.comments.value.trim() || null,
+        soup_id: currentOrder.soup ? currentOrder.soup.id : null,
+        main_course_id: currentOrder['main-course'] ? currentOrder['main-course'].id : null,
+        salad_id: currentOrder.salad ? currentOrder.salad.id : null,
+        drink_id: currentOrder.drink ? currentOrder.drink.id : null,
+        dessert_id: currentOrder.dessert ? currentOrder.dessert.id : null
+    };
+
+    return payload;
 }
 
 function createOrderDisplayContainer() { //создание контейнера с отображением заказа
@@ -154,23 +178,30 @@ function updateOrderSummary() {
 //добавление обработки кнопок формы
 function attachFormHandlers() {
     const orderForm = document.getElementById('orderForm');
-    orderForm.addEventListener('submit', (e) => {
+    orderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const validationResult = validateOrder();
         if (!validationResult.valid) {
             showNotification(validationResult.message);
             return;
         }
-
-        Object.keys(currentOrder).forEach(cat => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = cat;
-            input.value = currentOrder[cat].keyword;
-            orderForm.appendChild(input);
-        });
-
-        orderForm.submit();
+        if (!API_KEY) {
+            showNotification('Укажите API Key перед отправкой заказа.');
+            return;
+        }
+        try {
+            await submitOrder(orderForm);
+            showNotification('Заказ успешно отправлен!');
+            currentOrder = {};
+            localStorage.removeItem('currentOrder');
+            document.querySelectorAll('.dish-card.selected').forEach(el => el.classList.remove('selected'));
+            updateOrderSummary();
+            if (window.pageType === 'orders') renderSelectedDishes();
+            orderForm.reset();
+        } catch (err) {
+            console.error(err);
+            showNotification(err.message || 'Не удалось отправить заказ. Попробуйте позже.');
+        }
     });
     orderForm.addEventListener('reset', () => {
         showNotification('Ничего не выбрано. Выберите блюда для заказа');
@@ -221,6 +252,32 @@ function validateOrder() {
     }
 
     return { valid: false, message: 'Выберите полный ланч согласно доступным вариантам' };
+}
+
+async function submitOrder(orderForm) {
+    const payload = buildOrderPayload(orderForm);
+    if (!payload.drink_id) {
+        throw new Error('Не выбран обязательный напиток');
+    }
+    const url = `${API_ADRESS}/orders?api_key=${encodeURIComponent(API_KEY)}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        let msg = 'Ошибка при отправке заказа';
+        try {
+            const errData = await response.json();
+            if (errData && errData.error) msg = errData.error;
+        } catch (_e) { /* ignore parse errors */ }
+        throw new Error(msg);
+    }
+
+    return response.json();
 }
 
 function showNotification(message) {
